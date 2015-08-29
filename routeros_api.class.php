@@ -1,19 +1,8 @@
 <?php
+
 //
 // RouterOS API class
 // Author: Denis Basta
-//
-// read() function altered by Nick Barnes to take into account the placing
-// of the "!done" reply and also correct calculation of the reply length.
-///
-// read() function altered by Ben Menking (ben@infotechsc.com); removed
-// echo statement that dumped byte data to screen
-//
-///////////////////////////
-// Revised by: Jeremy Jefferson (http://jeremyj.com)
-// January 8, 2010
-//
-//	Fixed write function in order to allow for queries to be executed
 //
 
 class routeros_api {
@@ -367,6 +356,20 @@ class routeros_api {
 			return false;
 
 	}
+
+  function comm ($com, $arr=array()) {
+
+    $count = count($arr);
+    $this->write($com, !$arr);
+    $i = 0;
+    foreach ($arr as $k => $v) {
+       $el = ($k[0] == "?") ? "$k=$v" : "=$k=$v";
+       $last = ($i++ == $count-1);
+       $this->write($el, $last);
+    }
+    return $this->read();
+  }
+
 
 }
 
