@@ -65,7 +65,7 @@ class routeros_api {
 
 			$length |= 0xC00000;
 
-			$length = chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
+			$length = chr( ($length >> 16) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		}
 		else
@@ -73,12 +73,12 @@ class routeros_api {
 
 			$length |= 0xE0000000;
 
-			$length = chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
+			$length = chr( ($length >> 24) & 0xFF) . chr( ($length >> 16) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		}
 		else
 		if ($length >= 0x10000000)
-			$length = chr(0xF0) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
+			$length = chr(0xF0) . chr( ($length >> 24) & 0xFF) . chr( ($length >> 16) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		return $length;
 
