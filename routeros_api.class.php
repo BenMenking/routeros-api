@@ -172,20 +172,20 @@ class routeros_api {
 			$PARSED = array();
 			$CURRENT = null;
 
-			for ($i = 0, $imax = count($response); $i < $imax; $i++) {
+			foreach ($response as $x) {
 
-				if (in_array($response[$i], array('!fatal', '!re', '!trap') ) ) {
+				if (in_array($x, array('!fatal', '!re', '!trap') ) ) {
 
-					if ($response[$i] == '!re')
+					if ($x == '!re')
 						$CURRENT = &$PARSED[];
 					else
-						$CURRENT = &$PARSED[$response[$i]][];
+						$CURRENT = &$PARSED[$x][];
 
 				}
 				else
-				if ($response[$i] != '!done') {
+				if ($x != '!done') {
 
-					if (preg_match_all('/[^=]+/i', $response[$i], $MATCHES) )
+					if (preg_match_all('/[^=]+/i', $x, $MATCHES) )
 						$CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
 
 				}
@@ -207,7 +207,6 @@ class routeros_api {
         function array_change_key_name(&$array) {
                 if (is_array($array) ) {
                         foreach ($array as $k => $v) {
-                                $tmp = "";
                                 $tmp = str_replace("-","_",$k);
                                 $tmp = str_replace("/","_",$tmp);
                                 if ($tmp) {
@@ -230,21 +229,21 @@ class routeros_api {
                 if (is_array($response) ) {
                         $PARSED = array();
                         $CURRENT = null;
-                        for ($i = 0, $imax = count($response); $i < $imax; $i++) {
-                                if (in_array($response[$i], array('!fatal', '!re', '!trap') ) ) {
-                                        if ($response[$i] == '!re')
+                        foreach ($response as $x) {
+                                if (in_array($x, array('!fatal', '!re', '!trap') ) ) {
+                                        if ($x == '!re')
                                                 $CURRENT = &$PARSED[];
                                         else
-                                                $CURRENT = &$PARSED[$response[$i]][];
+                                                $CURRENT = &$PARSED[$x][];
                                 }
                                 else
-                                if ($response[$i] != '!done') {
-                                        if (preg_match_all('/[^=]+/i', $response[$i], $MATCHES) )
+                                if ($x != '!done') {
+                                        if (preg_match_all('/[^=]+/i', $x, $MATCHES) )
                                                 $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
                                 }
                         }
                         foreach ($PARSED as $key => $value) {
-                                $PARSED[$key] = $this->array_change_key_name($PARSED[$key]);
+                                $PARSED[$key] = $this->array_change_key_name($value);
                         }
                         return $PARSED;
                 }
