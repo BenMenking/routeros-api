@@ -15,7 +15,7 @@ class routeros_api {
 	var $connected = false;		// Connection state
 	var $delay = 3;				// Delay between connection attempts in seconds
 	var $port = 8728;			// Port to connect to
-	var $timeout = 5;			// Connection attempt timeout and data read timeout
+	var $timeout = 3;			// Connection attempt timeout and data read timeout
 
 	var $socket;				// Variable for storing socket resource
 
@@ -34,49 +34,42 @@ class routeros_api {
 	 *
 	 *************************************************/
 
-	function encode_length($command) {
+	function encode_length($length) {
 
-		$LENGTH = strlen($command);
+		if ($length < 0x80) {
 
-		if ($LENGTH < 0x80) {
-
-			$LENGTH = chr($LENGTH);
+			$length = chr($length);
 
 		}
 		else
-		if ($LENGTH < 0x4000) {
+		if ($length < 0x4000) {
 
-			$LENGTH |= 0x8000;
+			$length |= 0x8000;
 
-			$LENGTH = chr( ($LENGTH >> 8) & 0xFF) . chr($LENGTH & 0xFF);
-
-		}
-		else
-		if ($LENGTH < 0x200000) {
-
-			$LENGTH |= 0xC00000;
-
-			$LENGTH = chr( ($LENGTH >> 8) & 0xFF) . chr( ($LENGTH >> 8) & 0xFF) . chr($LENGTH & 0xFF);
+			$length = chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		}
 		else
-		if ($LENGTH < 0x10000000) {
+		if ($length < 0x200000) {
 
-			$LENGTH |= 0xE0000000;
+			$length |= 0xC00000;
 
-			$LENGTH = chr( ($LENGTH >> 8) & 0xFF) . chr( ($LENGTH >> 8) & 0xFF) . chr( ($LENGTH >> 8) & 0xFF) . chr($LENGTH & 0xFF);
+			$length = chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		}
 		else
-		if ($LENGTH < 0x10000000) {
+		if ($length < 0x10000000) {
 
-			$LENGTH |= 0xE0000000;
+			$length |= 0xE0000000;
 
-			$LENGTH = chr( ($LENGTH >> 8) & 0xFF) . chr( ($LENGTH >> 8) & 0xFF) . chr( ($LENGTH >> 8) & 0xFF) . chr($LENGTH & 0xFF);
+			$length = chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
 		}
+		else
+		if ($length >= 0x10000000)
+			$length = chr(0xF0) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr( ($length >> 8) & 0xFF) . chr($length & 0xFF);
 
-		return $LENGTH;
+		return $length;
 
 	}
 
@@ -108,7 +101,7 @@ class routeros_api {
 
 							$this->write('/login', false);
 							$this->write('=name=' . $login, false);
-							$this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1]) ));
+							$this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1]) ) );
 
 							$RESPONSE = $this->read(false);
 
@@ -128,9 +121,9 @@ class routeros_api {
 
 				fclose($this->socket);
 
-				sleep($this->delay);
-
 			}
+
+			sleep($this->delay);
 
 		}
 
@@ -170,7 +163,7 @@ class routeros_api {
 
 			for ($i = 0, $imax = count($response); $i < $imax; $i++) {
 
-				if (in_array($response[$i], array('!fatal', '!re', '!trap') )) {
+				if (in_array($response[$i], array('!fatal', '!re', '!trap') ) ) {
 
 					if ($response[$i] == '!re')
 						$CURRENT = &$PARSED[];
@@ -181,17 +174,14 @@ class routeros_api {
 				else
 				if ($response[$i] != '!done') {
 
-					if (preg_match_all('/[^=]+/i', $response[$i], $MATCHES) ) {
-
-						$CURRENT[$MATCHES[0][0]] = $MATCHES[0][1];
-
-					}
+					if (preg_match_all('/[^=]+/i', $response[$i], $MATCHES) )
+						$CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
 
 				}
 
 			}
 
-			return (count($PARSED) == 1 ? $PARSED[0] : $PARSED);
+			return $PARSED;
 
 		}
 		else
@@ -207,23 +197,27 @@ class routeros_api {
 
 		$RESPONSE = array();
 
-		do {
+		while (true) {
 
 			$LENGTH = ord(fread($this->socket, 1) );
 
-			if ($LENGTH) {
+			if ($LENGTH > 0) {
 
 				$_ = fread($this->socket, $LENGTH);
 
 				$RESPONSE[] = $_;
 
-				$this->debug('>>> [' . $LENGTH . '] ' . $_);
-
 			}
 
 			$STATUS = socket_get_status($this->socket);
 
-		} while ($STATUS['unread_bytes']);
+			if ($LENGTH > 0)
+				$this->debug('>>> [' . $LENGTH . ', ' . $STATUS['unread_bytes'] . '] ' . $_);
+
+			if ( (!$this->connected && !$STATUS['unread_bytes']) || ($this->connected && $_ == '!done' && !$STATUS['unread_bytes']) )
+				break;
+
+		}
 
 		if ($parse)
 			$RESPONSE = $this->parse_response($RESPONSE);
@@ -240,13 +234,13 @@ class routeros_api {
 
 		if ($command) {
 
-			fputs($this->socket, $this->encode_length($command) . $command);
+			fwrite($this->socket, $this->encode_length(strlen($command) ) . $command);
 
 			$this->debug('<<< [' . strlen($command) . '] ' . $command);
 
 			if (gettype($param2) == 'integer') {
 
-				fwrite($this->socket, $this->encode_length('.tag=' . $param2) . '.tag=' . $param2 . chr(0) );
+				fwrite($this->socket, $this->encode_length(strlen('.tag=' . $param2) ) . '.tag=' . $param2 . chr(0) );
 
 				$this->debug('<<< [' . strlen('.tag=' . $param2) . '] .tag=' . $param2);
 
