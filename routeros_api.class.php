@@ -246,6 +246,7 @@ class routeros_api
     function read($parse = true)
     {
         $RESPONSE = array();
+        receiveddone = false;
         while (true) {
             // Read the first byte of input which gives us some or all of the length
             // of the remaining reply.
