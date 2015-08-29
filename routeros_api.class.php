@@ -196,6 +196,59 @@ class routeros_api {
 	 *
 	 *************************************************/
 
+        function array_change_key_name(&$array) {
+                if (is_array($array) ) {
+                        foreach ($array as $k => $v) {
+                                $tmp = "";
+                                $tmp = str_replace("-","_",$k);
+                                $tmp = str_replace("/","_",$tmp);
+                                if ($tmp) {
+                                        $array_new[$tmp] = $v;
+                                } else {
+                                        $array_new[$k] = $v;
+                                }
+                        }
+                        return $array_new;
+                } else {
+                        return $array;
+                }
+        }
+
+        /**************************************************
+         *
+         *************************************************/
+
+        function parse_response4smarty($response) {
+                if (is_array($response) ) {
+                        $PARSED = array();
+                        $CURRENT = null;
+                        for ($i = 0, $imax = count($response); $i < $imax; $i++) {
+                                if (in_array($response[$i], array('!fatal', '!re', '!trap') ) ) {
+                                        if ($response[$i] == '!re')
+                                                $CURRENT = &$PARSED[];
+                                        else
+                                                $CURRENT = &$PARSED[$response[$i]][];
+                                }
+                                else
+                                if ($response[$i] != '!done') {
+                                        if (preg_match_all('/[^=]+/i', $response[$i], $MATCHES) )
+                                                $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                                }
+                        }
+                        foreach ($PARSED as $key => $value) {
+                                $PARSED[$key] = $this->array_change_key_name($PARSED[$key]);
+                        }
+                        return $PARSED;
+                }
+                else {
+                        return array();
+                }
+        }
+
+	/**************************************************
+	 *
+	 *************************************************/
+
    function read($parse = true) {
 
       $RESPONSE = array();
