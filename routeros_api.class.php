@@ -1,5 +1,4 @@
 <?php
-
 //
 // RouterOS API class
 // Author: Denis Basta
@@ -9,6 +8,12 @@
 ///
 // read() function altered by Ben Menking (ben@infotechsc.com); removed
 // echo statement that dumped byte data to screen
+//
+///////////////////////////
+// Revised by: Jeremy Jefferson (http://jeremyj.com)
+// January 8, 2010
+//
+//	Fixed write function in order to allow for queries to be executed
 //
 
 class routeros_api {
@@ -334,10 +339,16 @@ class routeros_api {
 	function write($command, $param2 = true) {
 
 		if ($command) {
+			
+			$data = explode("\n",$command);
+			
+			foreach ($data as $com) {
+				$com = trim($com);
+			        fwrite($this->socket, $this->encode_length(strlen($com) ) . $com);
+			        $this->debug('<<< [' . strlen($com) . '] ' . $com);
+			}
 
-			fwrite($this->socket, $this->encode_length(strlen($command) ) . $command);
-
-			$this->debug('<<< [' . strlen($command) . '] ' . $command);
+			
 
 			if (gettype($param2) == 'integer') {
 
