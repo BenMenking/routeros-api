@@ -97,7 +97,7 @@ class routeros_api
                 socket_set_timeout($this->socket, $this->timeout);
                 $this->write('/login');
                 $RESPONSE = $this->read(false);
-                if ($RESPONSE[0] == '!done') {
+                if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
                     $MATCHES = array();
                     if (preg_match_all('/[^=]+/i', $RESPONSE[1], $MATCHES)) {
                         if ($MATCHES[0][0] == 'ret' && strlen($MATCHES[0][1]) == 32) {
@@ -295,6 +295,9 @@ class routeros_api
             } else {
                 $LENGTH = $BYTE;
             }
+			
+			$_ = "";
+			
             // If we have got more characters to read, read them in.
             if ($LENGTH > 0) {
                 $_      = "";
