@@ -1,7 +1,7 @@
 <?php
 /*****************************
  *
- * RouterOS PHP API class v1.5
+ * RouterOS PHP API class v1.6
  * Author: Denis Basta
  * Contributors:
  *    Nick Barnes
@@ -25,6 +25,17 @@ class routeros_api
     var $port = 8728;        // Port to connect to
     var $timeout = 3;        // Connection attempt timeout and data read timeout
     var $socket;             // Variable for storing socket resource
+
+    /* Check, can be var used in foreach  */
+    function is_iterable($var)
+    {
+        return $var !== null
+                && (is_array($var)
+                || $var instanceof Traversable
+                || $var instanceof Iterator
+                || $var instanceof IteratorAggregate
+                );
+    }
     
     /**
      * Print text for debug purposes
@@ -354,20 +365,23 @@ class routeros_api
         $count = count($arr);
         $this->write($com, !$arr);
         $i = 0;
-        foreach ($arr as $k => $v) {
-            switch ($k[0]) {
-                case "?":
-                    $el = "$k=$v";
-                    break;
-                case "~":
-                    $el = "$k~$v";
-                    break;
-                default:
-                    $el = "=$k=$v";
-                    break;
+        if ($this->is_iterable($arr)) {
+            foreach ($arr as $k => $v) {
+                switch ($k[0]) {
+                    case "?":
+                        $el = "$k=$v";
+                        break;
+                    case "~":
+                        $el = "$k~$v";
+                        break;
+                    default:
+                        $el = "=$k=$v";
+                        break;
+                }
+
+                $last = ($i++ == $count - 1);
+                $this->write($el, $last);
             }
-            $last = ($i++ == $count - 1);
-            $this->write($el, $last);
         }
         return $this->read();
     }
