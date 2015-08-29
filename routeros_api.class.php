@@ -6,6 +6,9 @@
 //
 // read() function altered by Nick Barnes to take into account the placing
 // of the "!done" reply and also correct calculation of the reply length.
+///
+// read() function altered by Ben Menking (ben@infotechsc.com); removed
+// echo statement that dumped byte data to screen
 //
 
 class routeros_api {
@@ -259,8 +262,6 @@ class routeros_api {
          // of the remaining reply.
          $BYTE = ord(fread($this->socket, 1) );
          $LENGTH = 0;
-         
-         echo "$BYTE\n";
 
          // If the first bit is set then we need to remove the first four bits, shift left 8
          // and then read another byte in.
