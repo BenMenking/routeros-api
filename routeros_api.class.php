@@ -8,6 +8,7 @@
  *    Ben Menking (ben [at] infotechsc [dot] com)
  *    Jeremy Jefferson (http://jeremyj.com)
  *    Cristian Deluxe (djcristiandeluxe [at] gmail [dot] com)
+ *    Mikhail Moskalev (mmv.rus [at] gmail [dot] com)
  *
  * http://www.mikrotik.com
  * http://wiki.mikrotik.com/wiki/API_PHP_class
