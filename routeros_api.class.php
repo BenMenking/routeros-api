@@ -4,6 +4,9 @@
 // RouterOS API class
 // Author: Denis Basta
 //
+// read() function altered by Nick Barnes to take into account the placing
+// of the "!done" reply and also correct calculation of the reply length.
+//
 
 class routeros_api {
 
@@ -193,39 +196,83 @@ class routeros_api {
 	 *
 	 *************************************************/
 
-	function read($parse = true) {
+   function read($parse = true) {
 
-		$RESPONSE = array();
+      $RESPONSE = array();
 
-		while (true) {
+      while (true) {
 
-			$LENGTH = ord(fread($this->socket, 1) );
+         // Read the first byte of input which gives us some or all of the length
+         // of the remaining reply.
+         $BYTE = ord(fread($this->socket, 1) );
+         $LENGTH = 0;
+         
+         echo "$BYTE\n";
 
-			if ($LENGTH > 0) {
+         // If the first bit is set then we need to remove the first four bits, shift left 8
+         // and then read another byte in.
+         // We repeat this for the second and third bits.
+         // If the fourth bit is set, we need to remove anything left in the first byte
+         // and then read in yet another byte.
+         if ($BYTE & 128) {
+            if (($BYTE & 192) == 128) {
+               $LENGTH = (($BYTE & 63) << 8 ) + ord(fread($this->socket, 1)) ;
+            } else {
+               if (($BYTE & 224) == 192) {
+                  $LENGTH = (($BYTE & 31) << 8 ) + ord(fread($this->socket, 1)) ;
+                  $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+               } else {
+                  if (($BYTE & 240) == 224) {
+                     $LENGTH = (($BYTE & 15) << 8 ) + ord(fread($this->socket, 1)) ;
+                     $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+                     $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+                  } else {
+                     $LENGTH = ord(fread($this->socket, 1)) ;
+                     $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+                     $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+                     $LENGTH = ($LENGTH << 8 ) + ord(fread($this->socket, 1)) ;
+                  }
+               }
+            }
+         } else {
+            $LENGTH = $BYTE;
+         }
 
-				$_ = fread($this->socket, $LENGTH);
+         // If we have got more characters to read, read them in.
+         if ($LENGTH > 0) {
+            $_ = "";
+            $retlen=0;
+            while ($retlen < $LENGTH) {
+               $toread = $LENGTH - $retlen ;
+               $_ .= fread($this->socket, $toread);
+               $retlen = strlen($_);
+            }
+            $RESPONSE[] = $_ ;
+            $this->debug('>>> [' . $retlen . '/' . $LENGTH . ' bytes read.');
+         }
 
-				$RESPONSE[] = $_;
+         // If we get a !done, make a note of it.
+         if ($_ == "!done")
+            $receiveddone=true;
 
-			}
+         $STATUS = socket_get_status($this->socket);
 
-			$STATUS = socket_get_status($this->socket);
+         
+         if ($LENGTH > 0)
+            $this->debug('>>> [' . $LENGTH . ', ' . $STATUS['unread_bytes'] . '] ' . $_);
 
-			if ($LENGTH > 0)
-				$this->debug('>>> [' . $LENGTH . ', ' . $STATUS['unread_bytes'] . '] ' . $_);
+         if ( (!$this->connected && !$STATUS['unread_bytes']) ||
+            ($this->connected && !$STATUS['unread_bytes'] && $receiveddone) )
+            break;
 
-			if ( (!$this->connected && !$STATUS['unread_bytes']) || ($this->connected && $_ == '!done' && !$STATUS['unread_bytes']) )
-				break;
+      }
 
-		}
+      if ($parse)
+         $RESPONSE = $this->parse_response($RESPONSE);
 
-		if ($parse)
-			$RESPONSE = $this->parse_response($RESPONSE);
+      return $RESPONSE;
 
-		return $RESPONSE;
-
-	}
-
+   }
 	/**************************************************
 	 *
 	 *************************************************/
