@@ -137,7 +137,10 @@ class RouterosAPI
      */
     public function disconnect()
     {
-        fclose($this->socket);
+        // let's make sure this socket is still valid.  it may have been closed by something else
+        if( is_resource($this->socket) ) {
+            fclose($this->socket);
+        }
         $this->connected = false;
         $this->debug('Disconnected...');
     }
@@ -412,7 +415,7 @@ class RouterosAPI
      *
      * @return void
      */
-    private function __destruct()
+    public function __destruct()
     {
         $this->disconnect();
     }
