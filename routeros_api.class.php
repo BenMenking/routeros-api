@@ -15,7 +15,7 @@
  *
  ******************************/
 
-class routeros_api
+class RouterosAPI
 {
     var $debug     = false; //  Show debug information
     var $connected = false; //  Connection state
@@ -29,7 +29,7 @@ class routeros_api
     var $error_str;         //  Variable for storing connection error text, if any
 
     /* Check, can be var used in foreach  */
-    public function is_iterable($var)
+    public function isIterable($var)
     {
         return $var !== null
                 && (is_array($var)
@@ -61,7 +61,7 @@ class routeros_api
      *
      * @return void
      */
-    public function encode_length($length)
+    public function encodeLength($length)
     {
         if ($length < 0x80) {
             $length = chr($length);
@@ -150,7 +150,7 @@ class routeros_api
      *
      * @return array                  Array with parsed data
      */
-    public function parse_response($response)
+    public function parseResponse($response)
     {
         if (is_array($response)) {
             $PARSED      = array();
@@ -192,7 +192,7 @@ class routeros_api
      *
      * @return array                  Array with parsed data
      */
-    public function parse_response4smarty($response)
+    public function parseResponse4Smarty($response)
     {
         if (is_array($response)) {
             $PARSED      = array();
@@ -216,7 +216,7 @@ class routeros_api
                 }
             }
             foreach ($PARSED as $key => $value) {
-                $PARSED[$key] = $this->array_change_key_name($value);
+                $PARSED[$key] = $this->arrayChangeKeyName($value);
             }
             return $PARSED;
             if (empty($PARSED) && !is_null($singlevalue)) {
@@ -235,7 +235,7 @@ class routeros_api
      *
      * @return array                  Array with changed key names
      */
-    public function array_change_key_name(&$array)
+    public function arrayChangeKeyName(&$array)
     {
         if (is_array($array)) {
             foreach ($array as $k => $v) {
@@ -330,7 +330,7 @@ class routeros_api
         }
 
         if ($parse) {
-            $RESPONSE = $this->parse_response($RESPONSE);
+            $RESPONSE = $this->parseResponse($RESPONSE);
         }
 
         return $RESPONSE;
@@ -354,12 +354,12 @@ class routeros_api
             $data = explode("\n", $command);
             foreach ($data as $com) {
                 $com = trim($com);
-                fwrite($this->socket, $this->encode_length(strlen($com)) . $com);
+                fwrite($this->socket, $this->encodeLength(strlen($com)) . $com);
                 $this->debug('<<< [' . strlen($com) . '] ' . $com);
             }
 
             if (gettype($param2) == 'integer') {
-                fwrite($this->socket, $this->encode_length(strlen('.tag=' . $param2)) . '.tag=' . $param2 . chr(0));
+                fwrite($this->socket, $this->encodeLength(strlen('.tag=' . $param2)) . '.tag=' . $param2 . chr(0));
                 $this->debug('<<< [' . strlen('.tag=' . $param2) . '] .tag=' . $param2);
             } elseif (gettype($param2) == 'boolean') {
                 fwrite($this->socket, ($param2 ? chr(0) : ''));
@@ -385,7 +385,7 @@ class routeros_api
         $count = count($arr);
         $this->write($com, !$arr);
         $i = 0;
-        if ($this->is_iterable($arr)) {
+        if ($this->isIterable($arr)) {
             foreach ($arr as $k => $v) {
                 switch ($k[0]) {
                     case "?":
