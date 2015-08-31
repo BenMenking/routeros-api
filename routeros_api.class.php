@@ -37,7 +37,7 @@ class routeros_api
                 || $var instanceof IteratorAggregate
                 );
     }
-    
+
     /**
      * Print text for debug purposes
      *
@@ -50,10 +50,10 @@ class routeros_api
         if ($this->debug)
             echo $text . "\n";
     }
-	
-	
+
+
     /**
-     * 
+     *
      *
      * @param string        $length
      *
@@ -76,8 +76,8 @@ class routeros_api
             $length = chr(0xF0) . chr(($length >> 24) & 0xFF) . chr(($length >> 16) & 0xFF) . chr(($length >> 8) & 0xFF) . chr($length & 0xFF);
         return $length;
     }
-	
-	
+
+
     /**
      * Login to RouterOS
      *
@@ -122,8 +122,8 @@ class routeros_api
             $this->debug('Error...');
         return $this->connected;
     }
-	
-	
+
+
     /**
      * Disconnect from RouterOS
      *
@@ -135,8 +135,8 @@ class routeros_api
         $this->connected = false;
         $this->debug('Disconnected...');
     }
-	
-	
+
+
     /**
      * Parse response from Router OS
      *
@@ -166,8 +166,8 @@ class routeros_api
                         if ($MATCHES[0][0] == 'ret') {
                             $singlevalue = $MATCHES[0][1];
                         }
-						$CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
-					}
+                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                    }
                 }
             }
             if (empty($PARSED) && !is_null($singlevalue)) {
@@ -177,8 +177,8 @@ class routeros_api
         } else
             return array();
     }
-	
-	
+
+
     /**
      * Parse response from Router OS
      *
@@ -209,7 +209,7 @@ class routeros_api
                             $singlevalue = $MATCHES[0][1];
                         }
                         $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
-					}
+                    }
                 }
             }
             foreach ($PARSED as $key => $value) {
@@ -223,8 +223,8 @@ class routeros_api
             return array();
         }
     }
-	
-	
+
+
     /**
      * Change "-" and "/" from array key to "_"
      *
@@ -249,8 +249,8 @@ class routeros_api
             return $array;
         }
     }
-	
-	
+
+
     /**
      * Read data from Router OS
      *
@@ -295,9 +295,9 @@ class routeros_api
             } else {
                 $LENGTH = $BYTE;
             }
-			
-			$_ = "";
-			
+
+            $_ = "";
+
             // If we have got more characters to read, read them in.
             if ($LENGTH > 0) {
                 $_      = "";
@@ -323,8 +323,8 @@ class routeros_api
             $RESPONSE = $this->parse_response($RESPONSE);
         return $RESPONSE;
     }
-	
-	
+
+
     /**
      * Write (send) data to Router OS
      *
@@ -354,8 +354,8 @@ class routeros_api
         } else
             return false;
     }
-	
-	
+
+
     /**
      * Write (send) data to Router OS
      *
@@ -388,6 +388,16 @@ class routeros_api
             }
         }
         return $this->read();
+    }
+
+    /**
+     * Standard destructor
+     *
+     * @return void
+     */
+    function __destruct()
+    {
+        $this->disconnect();
     }
 }
 ?>
