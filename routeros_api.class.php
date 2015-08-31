@@ -389,5 +389,15 @@ class routeros_api
         }
         return $this->read();
     }
+
+    /**
+     * Standard destructor
+     *
+     * @return void
+     */
+    function __destruct()
+    {
+        $this->disconnect();
+    }
 }
 ?>
