@@ -166,8 +166,8 @@ class routeros_api
                         if ($MATCHES[0][0] == 'ret') {
                             $singlevalue = $MATCHES[0][1];
                         }
-						$CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
-					}
+                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                    }
                 }
             }
             if (empty($PARSED) && !is_null($singlevalue)) {
@@ -209,7 +209,7 @@ class routeros_api
                             $singlevalue = $MATCHES[0][1];
                         }
                         $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
-					}
+                    }
                 }
             }
             foreach ($PARSED as $key => $value) {
@@ -296,7 +296,7 @@ class routeros_api
                 $LENGTH = $BYTE;
             }
 
-			$_ = "";
+            $_ = "";
 
             // If we have got more characters to read, read them in.
             if ($LENGTH > 0) {
