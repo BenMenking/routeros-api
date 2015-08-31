@@ -29,7 +29,7 @@ class routeros_api
     var $error_str;         //  Variable for storing connection error text, if any
 
     /* Check, can be var used in foreach  */
-    function is_iterable($var)
+    public function is_iterable($var)
     {
         return $var !== null
                 && (is_array($var)
@@ -46,7 +46,7 @@ class routeros_api
      *
      * @return void
      */
-    function debug($text)
+    public function debug($text)
     {
         if ($this->debug) {
             echo $text . "\n";
@@ -61,7 +61,7 @@ class routeros_api
      *
      * @return void
      */
-    function encode_length($length)
+    public function encode_length($length)
     {
         if ($length < 0x80) {
             $length = chr($length);
@@ -91,7 +91,7 @@ class routeros_api
      *
      * @return boolean                If we are connected or not
      */
-    function connect($ip, $login, $password)
+    public function connect($ip, $login, $password)
     {
         for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
             $this->connected = false;
@@ -135,7 +135,7 @@ class routeros_api
      *
      * @return void
      */
-    function disconnect()
+    public function disconnect()
     {
         fclose($this->socket);
         $this->connected = false;
@@ -150,7 +150,7 @@ class routeros_api
      *
      * @return array                  Array with parsed data
      */
-    function parse_response($response)
+    public function parse_response($response)
     {
         if (is_array($response)) {
             $PARSED      = array();
@@ -192,7 +192,7 @@ class routeros_api
      *
      * @return array                  Array with parsed data
      */
-    function parse_response4smarty($response)
+    public function parse_response4smarty($response)
     {
         if (is_array($response)) {
             $PARSED      = array();
@@ -235,7 +235,7 @@ class routeros_api
      *
      * @return array                  Array with changed key names
      */
-    function array_change_key_name(&$array)
+    public function array_change_key_name(&$array)
     {
         if (is_array($array)) {
             foreach ($array as $k => $v) {
@@ -261,7 +261,7 @@ class routeros_api
      *
      * @return array                  Array with parsed or unparsed data
      */
-    function read($parse = true)
+    public function read($parse = true)
     {
         $RESPONSE     = array();
         $receiveddone = false;
@@ -348,7 +348,7 @@ class routeros_api
      *
      * @return boolean                Return false if no command especified
      */
-    function write($command, $param2 = true)
+    public function write($command, $param2 = true)
     {
         if ($command) {
             $data = explode("\n", $command);
@@ -380,7 +380,7 @@ class routeros_api
      *
      * @return array                  Array with parsed
      */
-    function comm($com, $arr = array())
+    public function comm($com, $arr = array())
     {
         $count = count($arr);
         $this->write($com, !$arr);
@@ -412,7 +412,7 @@ class routeros_api
      *
      * @return void
      */
-    function __destruct()
+    private function __destruct()
     {
         $this->disconnect();
     }
