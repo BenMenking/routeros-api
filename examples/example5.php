@@ -12,7 +12,7 @@ if ($API->connect('111.111.111.111', 'LOGIN', 'PASSWORD')) {
 
    $ARRAY = $API->comm("/ip/dhcp-server/lease/print", array(
       "count-only"=> "",
-       ~active-address" => "1.1.",
+      "~active-address" => "1.1.",
    ));
    
    print_r($ARRAY);
