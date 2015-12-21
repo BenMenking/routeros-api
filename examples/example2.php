@@ -11,7 +11,7 @@ if ($API->connect('111.111.111.111', 'LOGIN', 'PASSWORD')) {
    $API->write('/interface/wireless/registration-table/print',false);
    $API->write('=stats=');
  
-   $READ = $API->read();
+   $READ = $API->read(false);
    $ARRAY = $API->parseResponse($READ);
 
    print_r($ARRAY);
