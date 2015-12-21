@@ -11,7 +11,7 @@ if ($API->connect('111.111.111.111', 'LOGIN', 'PASSWORD')) {
    $API->write('/interface/getall');
 
    $READ = $API->read();
-   $ARRAY = $API->parse_response($READ);
+   $ARRAY = $API->parseResponse($READ);
 
    print_r($ARRAY);
 
