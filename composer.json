@@ -1,0 +1,44 @@
+{
+    "name": "BenMenking/routeros-api",
+    "description": "Client API for RouterOS/Mikrotik",
+    "keywords": [
+        "routeros",
+        "mikrotik"
+    ],
+    "type": "library",
+    "support": {
+        "issues": "https://github.com/BenMenking/routeros-api/issues",
+        "wiki": "http://wiki.mikrotik.com/wiki/API_PHP_class",
+        "source": "https://github.com/BenMenking/routeros-api"
+    },
+    "authors": [
+        {
+            "name": "Denis Basta",
+            "email": "Denis.Basta@gmail.com"
+        },
+        {
+            "name": "Nick Barnes"
+        },
+        {
+            "name": "Ben Menking",
+            "email": "ben@infotechsc.com"
+        },
+        {
+            "name": "Jeremy Jefferson",
+            "url": "http://jeremyj.com"
+        },
+        {
+            "name": "Cristian Deluxe",
+            "url": "djcristiandeluxe@gmail.com"
+        },
+        {
+            "name": "Mikhail Moskalev",
+            "url": "mmv.rus@gmail.com"
+        }
+    ],
+    "autoload": {
+        "classmap": [
+            "routeros_api.class.php"
+        ]
+    }
+}
