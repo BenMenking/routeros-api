@@ -111,7 +111,7 @@ class RouterosAPI
                             $this->write('=name=' . $login, false);
                             $this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1])));
                             $RESPONSE = $this->read(false);
-                            if ($RESPONSE[0] == '!done') {
+                            if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
                                 $this->connected = true;
                                 break;
                             }
