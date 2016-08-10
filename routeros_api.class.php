@@ -21,7 +21,8 @@ class RouterosAPI
     var $connected   = false;                                 //  Connection state
     var $port        = 8728;                                  //  Port to connect to (default 8729 for ssl)
     var $ssl         = false;                                 //  Connect using SSL (must enable api-ssl in IP/Services)
-    var $sslProtocol = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;    // Protocol type
+    var $sslProtocol = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;    //  Protocol type
+    var $sslVerify   = true;                                  //  Always verify SSL certificate, if false, just accept it by trusting it
     var $timeout     = 3;                                     //  Connection attempt timeout and data read timeout
     var $attempts    = 5;                                     //  Connection attempt count
     var $delay       = 3;                                     //  Delay between connection attempts in seconds
@@ -100,7 +101,8 @@ class RouterosAPI
 
             // Attempt connection via plain socket or SSL/TLS based on user preferences
             $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $ip . ':' . $this->port . ( $this->ssl ? ' using ' . $this->sslProtocol : '' ) . '...');
-            $this->socket = @stream_socket_client("$ip:$this->port", $this->error_no, $this->error_str);
+            $this->socket = @stream_socket_client( $ip . ':' . $this->port, $this->error_no, $this->error_str);
+            @stream_context_set_option( 'verify_peer', $this->sslVerify );
             @stream_socket_enable_crypto($this->socket, $this->ssl, $this->sslProtocol);
 
             if ($this->socket) {
