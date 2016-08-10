@@ -101,11 +101,12 @@ class RouterosAPI
 
             // Attempt connection via plain socket or SSL/TLS based on user preferences
             $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $ip . ':' . $this->port . ( $this->ssl ? ' using ' . $this->sslProtocol : '' ) . '...');
-            $this->socket = @stream_socket_client( $ip . ':' . $this->port, $this->error_no, $this->error_str);
+            $context = stream_context_create();
 
             if ( !empty($this->sslOptions) )
-              @stream_context_set_option( $this->socket, $this->sslOptions );
+              @stream_context_set_option( $context, $this->sslOptions );
 
+            $this->socket = @stream_socket_client( $ip . ':' . $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT, $context);
             @stream_socket_enable_crypto($this->socket, $this->ssl, $this->sslProtocol);
             // Connection was hopefully successfully enstablished
 
