@@ -17,13 +17,14 @@
 
 class RouterosAPI
 {
-    var $debug     = false; //  Show debug information
-    var $connected = false; //  Connection state
-    var $port      = 8728;  //  Port to connect to (default 8729 for ssl)
-    var $ssl       = false; //  Connect using SSL (must enable api-ssl in IP/Services)
-    var $timeout   = 3;     //  Connection attempt timeout and data read timeout
-    var $attempts  = 5;     //  Connection attempt count
-    var $delay     = 3;     //  Delay between connection attempts in seconds
+    var $debug       = false;                                 //  Show debug information
+    var $connected   = false;                                 //  Connection state
+    var $port        = 8728;                                  //  Port to connect to (default 8729 for ssl)
+    var $ssl         = false;                                 //  Connect using SSL (must enable api-ssl in IP/Services)
+    var $sslProtocol = STREAM_CRYPTO_METHOD_SSLv23_CLIENT;    // Protocol type
+    var $timeout     = 3;                                     //  Connection attempt timeout and data read timeout
+    var $attempts    = 5;                                     //  Connection attempt count
+    var $delay       = 3;                                     //  Delay between connection attempts in seconds
 
     var $socket;            //  Variable for storing socket resource
     var $error_no;          //  Variable for storing connection error number, if any
@@ -96,9 +97,12 @@ class RouterosAPI
     {
         for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
             $this->connected = false;
-            $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
-            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
-            $this->socket = @fsockopen($PROTOCOL . $ip, $this->port, $this->error_no, $this->error_str, $this->timeout);
+
+            // Attempt connection via plain socket or SSL/TLS based on user preferences
+            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $ip . ':' . $this->port . ( $this->ssl ? ' using ' . $this->sslProtocol : '' ) . '...');
+            $this->socket = @stream_socket_client("$this->ip:$this->port", $this->error_no, $this->error_str);
+            @stream_socket_enable_crypto($this->socket, $this->ssl, $this->sslProtocol);
+
             if ($this->socket) {
                 socket_set_timeout($this->socket, $this->timeout);
                 $this->write('/login');
