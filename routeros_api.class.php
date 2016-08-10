@@ -100,7 +100,7 @@ class RouterosAPI
 
             // Attempt connection via plain socket or SSL/TLS based on user preferences
             $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $ip . ':' . $this->port . ( $this->ssl ? ' using ' . $this->sslProtocol : '' ) . '...');
-            $this->socket = @stream_socket_client("$this->ip:$this->port", $this->error_no, $this->error_str);
+            $this->socket = @stream_socket_client("$ip:$this->port", $this->error_no, $this->error_str);
             @stream_socket_enable_crypto($this->socket, $this->ssl, $this->sslProtocol);
 
             if ($this->socket) {
