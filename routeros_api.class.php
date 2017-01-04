@@ -1,7 +1,7 @@
 <?php
 /*****************************
  *
- * RouterOS PHP API class v1.6
+ * RouterOS PHP API class v1.7
  * Author: Denis Basta
  * Contributors:
  *    Nick Barnes
@@ -17,17 +17,24 @@
 
 class RouterosAPI
 {
+	  var $version_major = 1;
+		var $version_minor = 7;
+		
     var $debug     = false; //  Show debug information
-    var $connected = false; //  Connection state
     var $port      = 8728;  //  Port to connect to (default 8729 for ssl)
     var $ssl       = false; //  Connect using SSL (must enable api-ssl in IP/Services)
     var $timeout   = 3;     //  Connection attempt timeout and data read timeout
-    var $attempts  = 5;     //  Connection attempt count
-    var $delay     = 3;     //  Delay between connection attempts in seconds
 
     var $socket;            //  Variable for storing socket resource
     var $error_no;          //  Variable for storing connection error number, if any
     var $error_str;         //  Variable for storing connection error text, if any
+		
+		var $last_command;			// variable that contains last command sent to device
+		
+		/* deprecated variables - remaining for backwards compatibility */
+    var $attempts  = 5;     //  Connection attempt count
+    var $delay     = 3;     //  Delay between connection attempts in seconds
+		var $connected = false; //  Connection state		
 
     /* Check, can be var used in foreach  */
     public function isIterable($var)
@@ -94,41 +101,66 @@ class RouterosAPI
      */
     public function connect($ip, $login, $password)
     {
-        for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
-            $this->connected = false;
-            $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
-            $context = stream_context_create(array('ssl' => array('ciphers' => 'ADH:ALL', 'verify_peer' => false, 'verify_peer_name' => false)));
-            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
-            $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT,$context);
-            if ($this->socket) {
-                socket_set_timeout($this->socket, $this->timeout);
-                $this->write('/login');
-                $RESPONSE = $this->read(false);
-                if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
-                    $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $RESPONSE[1], $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret' && strlen($MATCHES[0][1]) == 32) {
-                            $this->write('/login', false);
-                            $this->write('=name=' . $login, false);
-                            $this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1])));
-                            $RESPONSE = $this->read(false);
-                            if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
-                                $this->connected = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-                fclose($this->socket);
-            }
-            sleep($this->delay);
-        }
+				$this->socket = false;
 
-        if ($this->connected) {
-            $this->debug('Connected...');
-        } else {
-            $this->debug('Error...');
-        }
+        $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
+				if( $this->ssl ) {
+						$context = stream_context_create(
+								array('ssl' => array('ciphers' => 'ADH:ALL', 'verify_peer' => false, 'verify_peer_name' => false)));
+						$PROTOCOL = 'ssl://';
+				}
+				else {
+					$PROTOCOL = '';
+					$context = stream_context_create();
+				}
+				
+        $this->debug('Connection attempt to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
+				
+        $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, 
+					STREAM_CLIENT_CONNECT, $context);
+				
+				if ($this->socket) {
+						$this->debug("Socket connected and is valid");
+						socket_set_timeout($this->socket, $this->timeout);
+						$this->debug("Querying device with '/login'");
+						
+						$this->write('/login');
+						$RESPONSE = $this->read(false);
+						if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+								$MATCHES = array();
+								if (preg_match_all('/[^=]+/i', $RESPONSE[1], $MATCHES)) {
+										if ($MATCHES[0][0] == 'ret' && strlen($MATCHES[0][1]) == 32) {
+												$this->debug("Device responded as expected");
+												$this->write('/login', false);
+												$this->write('=name=' . $login, false);
+												$this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1])));
+												$RESPONSE = $this->read(false);
+												if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+														$this->debug("Device authenticated us");
+														$this->connected = true;
+												}
+												else {
+													$this->error_no = -1;
+													$this->error_str = "Failed to authenticate to device";
+													fclose($this->socket);
+												}
+										}
+										else {
+											$this->error_no = -1;
+											$this->error_str = "Matched response from device but data not correct: '{$RESPONSE[1]}'";
+											fclose($this->socket);
+										}
+								}
+								else {
+									$this->error_no = -1;
+									$this->error_str = "Response from device didn't match preg expectation: '{$RESPONSE[1]}'";
+									fclose($this->socket);
+								}
+						}
+				}
+
+				$this->debug("Connected: " . ($this->connected?'true':'false'));
+
         return $this->connected;
     }
 
@@ -145,7 +177,6 @@ class RouterosAPI
             fclose($this->socket);
         }
         $this->connected = false;
-        $this->debug('Disconnected...');
     }
 
 
@@ -259,6 +290,17 @@ class RouterosAPI
         }
     }
 
+		private function check_socket() {
+				$check = is_resource($this->socket);
+				
+				if( !$check ) {
+						$this->error_no = socket_last_error();
+						$this->error_str = socket_strerror($this->error_no);
+						$this->connected = false;
+				}
+				
+				return $check;
+		}
 
     /**
      * Read data from Router OS
@@ -271,7 +313,7 @@ class RouterosAPI
     {
         $RESPONSE     = array();
         $receiveddone = false;
-        while (true) {
+        while ($this->check_socket()) {
             // Read the first byte of input which gives us some or all of the length
             // of the remaining reply.
             $BYTE   = ord(fread($this->socket, 1));
@@ -335,6 +377,10 @@ class RouterosAPI
             }
         }
 
+				if( !$this->check_socket() ) {
+						return false;
+				}
+				
         if ($parse) {
             $RESPONSE = $this->parseResponse($RESPONSE);
         }
@@ -356,7 +402,13 @@ class RouterosAPI
      */
     public function write($command, $param2 = true)
     {
+				if( !$this->check_socket() ) {
+					return false;
+				}
+				
         if ($command) {
+					$this->last_command = $command;
+					
             $data = explode("\n", $command);
             foreach ($data as $com) {
                 $com = trim($com);
@@ -379,7 +431,7 @@ class RouterosAPI
 
 
     /**
-     * Write (send) data to Router OS
+     * Write (send) request to Router OS and wait until command has completed
      *
      * @param string      $com        A string with the command to send
      * @param array       $arr        An array with arguments or queries
@@ -410,7 +462,14 @@ class RouterosAPI
             }
         }
 
-        return $this->read();
+				// special case.  tool fetch never returns !done, so the command never completes.  we need to check
+				// for that
+				//if( $this->last_command == '/tool/fetch' ) {
+				//	$response = 
+				//}
+				//else {
+					return $this->read();
+				//}
     }
 
     /**
