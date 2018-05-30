@@ -102,7 +102,23 @@ class RouterosAPI
             $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT,$context);
             if ($this->socket) {
                 socket_set_timeout($this->socket, $this->timeout);
-                $this->write('/login');
+                //begin Login method post-v6.43
+	            $this->write('/login', false);
+	            $this->write('=name=' . $login, false);
+	            $this->write('=password=' . $password);
+	            $RESPONSE = $this->read(false);
+	            if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+		            $this->connected = true;
+		            break;
+	            } else {
+		            $MATCHES = [];
+		            if ($RESPONSE[0] === '!trap' && preg_match_all('/^=message=(.+?) \(\d+\)$/i', $RESPONSE[1], $MATCHES)) {
+			            $this->debug('Error! ' . $MATCHES[1][0]);
+		            }
+	            }
+	            //end Login method post-v6.43
+                //begin Login method pre-v6.43
+                /*$this->write('/login');
                 $RESPONSE = $this->read(false);
                 if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
                     $MATCHES = array();
@@ -119,6 +135,8 @@ class RouterosAPI
                         }
                     }
                 }
+                */
+	            //end Login method pre-v6.43
                 fclose($this->socket);
             }
             sleep($this->delay);
