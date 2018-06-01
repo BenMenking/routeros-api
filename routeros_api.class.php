@@ -170,12 +170,12 @@ class RouterosAPI
                         $CURRENT =& $PARSED[$x][];
                     }
                 } elseif ($x != '!done') {
-                    $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret') {
-                            $singlevalue = $MATCHES[0][1];
+                    $MATCHES = explode('=', ltrim($x, '='), 2);
+                    if (count($MATCHES)) {
+                        if ($MATCHES[0] == 'ret') {
+                            $singlevalue = $MATCHES[1];
                         }
-                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        $CURRENT[$MATCHES[0]] = (isset($MATCHES[1]) ? $MATCHES[1] : '');
                     }
                 }
             }
@@ -212,12 +212,12 @@ class RouterosAPI
                         $CURRENT =& $PARSED[$x][];
                     }
                 } elseif ($x != '!done') {
-                    $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret') {
-                            $singlevalue = $MATCHES[0][1];
+                    $MATCHES = explode('=', ltrim($x, '='), 2);
+                    if (count($MATCHES)) {
+                        if ($MATCHES[0] == 'ret') {
+                            $singlevalue = $MATCHES[1];
                         }
-                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        $CURRENT[$MATCHES[0]] = (isset($MATCHES[1]) ? $MATCHES[1] : '');
                     }
                 }
             }
