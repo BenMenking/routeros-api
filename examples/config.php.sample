@@ -1,0 +1,4 @@
+<?php
+	$router_ip = '111.111.111.111';
+	$username = 'LOGIN';
+	$password = 'PASSWORD';

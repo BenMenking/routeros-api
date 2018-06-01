@@ -44,3 +44,6 @@ Temporary Items
 
 ### JetBrains PhpStorm
 .idea/
+
+# Project
+/examples/config.php
