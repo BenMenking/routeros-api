@@ -175,6 +175,13 @@ class RouterosAPI
                         if ($MATCHES[0][0] == 'ret') {
                             $singlevalue = $MATCHES[0][1];
                         }
+                        $MATCHES_LEN[0]=count($MATCHES[0]);
+                        if ($MATCHES_LEN[0]>2) {
+                            $MATCHES_VALUE=$MATCHES[0];
+                            array_shift($MATCHES_VALUE);
+                            $MATCHES[0][1]=implode('=', $MATCHES_VALUE);
+                            $MATCHES[0]=array_slice($MATCHES[0],0,2);
+                        }
                         $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
                     }
                 }
