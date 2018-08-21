@@ -104,15 +104,15 @@ class RouterosAPI
                 socket_set_timeout($this->socket, $this->timeout);
                 $this->write('/login');
                 $RESPONSE = $this->read(false);
-                if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+                if (isset($RESPONSE[0]) && $RESPONSE[0] === '!done') {
                     $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $RESPONSE[1], $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret' && strlen($MATCHES[0][1]) == 32) {
+                    if (preg_match_all('/^=(.*)=(.*)/', $RESPONSE[1], $MATCHES)) {
+                        if ($MATCHES[1][0] === 'ret' && strlen($MATCHES[2][0]) === 32) {
                             $this->write('/login', false);
                             $this->write('=name=' . $login, false);
-                            $this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[0][1])));
+                            $this->write('=response=00' . md5(chr(0) . $password . pack('H*', $MATCHES[2][0])));
                             $RESPONSE = $this->read(false);
-                            if (isset($RESPONSE[0]) && $RESPONSE[0] == '!done') {
+                            if (isset($RESPONSE[0]) && $RESPONSE[0] === '!done') {
                                 $this->connected = true;
                                 break;
                             }
@@ -164,23 +164,23 @@ class RouterosAPI
             $singlevalue = null;
             foreach ($response as $x) {
                 if (in_array($x, array('!fatal','!re','!trap'))) {
-                    if ($x == '!re') {
+                    if ($x === '!re') {
                         $CURRENT =& $PARSED[];
                     } else {
                         $CURRENT =& $PARSED[$x][];
                     }
-                } elseif ($x != '!done') {
+                } elseif ($x !== '!done') {
                     $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret') {
-                            $singlevalue = $MATCHES[0][1];
+                    if (preg_match_all('/^=(.*)=(.*)/', $x, $MATCHES)) {
+                        if ($MATCHES[1][0] === 'ret') {
+                            $singlevalue = $MATCHES[2][0];
                         }
-                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        $CURRENT[$MATCHES[1][0]] = (isset($MATCHES[2][0]) ? $MATCHES[2][0] : '');
                     }
                 }
             }
 
-            if (empty($PARSED) && !is_null($singlevalue)) {
+            if (empty($PARSED) && null !== $singlevalue) {
                 $PARSED = $singlevalue;
             }
 
