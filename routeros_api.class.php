@@ -19,8 +19,8 @@ class RouterosAPI
 {
     var $debug     = false; //  Show debug information
     var $connected = false; //  Connection state
-    var $port      = 8728;  //  Port to connect to (default 8729 for ssl)
-    var $ssl       = false; //  Connect using SSL (must enable api-ssl in IP/Services)
+    var $port      = 8729;  //  Port to connect to (default 8729 for ssl)
+    var $ssl       = true; //  Connect using SSL (must enable api-ssl in IP/Services)
     var $timeout   = 3;     //  Connection attempt timeout and data read timeout
     var $attempts  = 5;     //  Connection attempt count
     var $delay     = 3;     //  Delay between connection attempts in seconds
