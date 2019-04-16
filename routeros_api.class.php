@@ -182,11 +182,11 @@ class RouterosAPI
                     }
                 } elseif ($x != '!done') {
                     $MATCHES = array();
-                    if (preg_match_all('/[^=]+/i', $x, $MATCHES)) {
-                        if ($MATCHES[0][0] == 'ret') {
-                            $singlevalue = $MATCHES[0][1];
+                    if (preg_match_all('/([^=]+)=(.*)/i', $x, $MATCHES)) {
+                        if ($MATCHES[1][0] == 'ret') {
+                            $singlevalue = $MATCHES[2][0];
                         }
-                        $CURRENT[$MATCHES[0][0]] = (isset($MATCHES[0][1]) ? $MATCHES[0][1] : '');
+                        $CURRENT[$MATCHES[1][0]] = (isset($MATCHES[2][0]) ? $MATCHES[2][0] : '');
                     }
                 }
             }
