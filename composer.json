@@ -1,5 +1,5 @@
 {
-    "name": "BenMenking/routeros-api",
+    "name": "ben-menking/routeros-api",
     "description": "Client API for RouterOS/Mikrotik",
     "keywords": [
         "routeros",
