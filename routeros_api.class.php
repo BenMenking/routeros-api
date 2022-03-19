@@ -15,6 +15,8 @@
  *
  ******************************/
 
+namespace RouterosAPI;
+
 class RouterosAPI
 {
     var $debug     = false; //  Show debug information
