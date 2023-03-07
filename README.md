@@ -1,3 +1,23 @@
+# installing with composer from this particular fork
+### 1. Add the following below your name/description:
+```angular2html
+"repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/mario7dujmovic/routeros-api-1.git"
+        }
+    ],
+```
+### 2. Require it in your `require` segment, e.g.:
+```angular2html
+    "require": {
+        (...)
+        "ben-menking/routeros-api": "dev-stable",
+        (...)
+    }
+```
+### 3. run `composer install`
+
 # routeros-api
 Client API for RouterOS/Mikrotik
 
