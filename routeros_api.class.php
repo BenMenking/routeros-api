@@ -97,10 +97,11 @@ class RouterosAPI
     {
         for ($ATTEMPT = 1; $ATTEMPT <= $this->attempts; $ATTEMPT++) {
             $this->connected = false;
+            $PROTOCOL = ($this->ssl ? 'ssl://' : '' );
             $CERTLESS = ($this->certless ? ':@SECLEVEL=0' : '' );
             $context = stream_context_create(array('ssl' => array('ciphers' => 'ADH:ALL' . $CERTLESS, 'verify_peer' => false, 'verify_peer_name' => false)));
-            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
-            $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT,$context);
+            $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $port . '...');
+            $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT,$context);
             if ($this->socket) {
                 socket_set_timeout($this->socket, $this->timeout);
                 $this->write('/login', false);
