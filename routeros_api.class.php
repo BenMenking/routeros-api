@@ -390,7 +390,40 @@ class RouterosAPI
         }
     }
 
+    
 
+    /**
+     * Write (send) data to Router OS
+     * Execute a plain command in Router OS
+     * Proposed by Israel Marrero 11/02/2024
+     *
+     * @param string      $command        A string with the command to send in winbox format
+     * Example01: $API->execmd("/system/clock/set time-zone-name=America/Caracas time-zone-autodetect=no")
+     * Example02: $API->execmd("/ping address=8.8.8.8 interval=2 count=5")
+     * Example03: $API->execmd("/system/identity/set name=MyMikrotik")
+     * @return array                  Array with parsed
+     */
+    public function execmd($command){
+        if ($command) {
+        $count=substr_count($command," ");
+
+          $data = explode(" ", trim($command));
+
+            $countspace=0;
+            $i = 0;
+            foreach ($data as $com) {
+                $last = ($i++ == $count);
+                if ($countspace==0){
+                    $this->write($com,$last);
+                }else{
+                    $this->write("=".$com,$last);
+                }
+                $countspace=$countspace+1;
+            }
+            return $this->read();
+       }
+    }
+    
     /**
      * Write (send) data to Router OS
      *
