@@ -1,13 +1,23 @@
 # routeros-api
 Client API for RouterOS/Mikrotik
 
-This class was originally written by Denis Basta and updated by several contributors. It aims to give a simple interface to the RouterOS API in PHP.
+It aims to give a simple interface to the RouterOS API in PHP.
 
 You can take it, edit it and use it as you need.
 
-The old Mikrotik Wiki page is found on archive.org https://web.archive.org/web/20170210102259/http://wiki.mikrotik.com/wiki/API_PHP_class
+## License
 
-## Contributors (before moving to Git)
+Distributed under the MIT License. See `LICENSE` for more information.
+
+The original author, Denis Basta, has granted permission for this project
+to be distributed under the MIT License.
+
+## Historical 
+
+The old Mikrotik Wiki page is found on archive.org 
+https://web.archive.org/web/20170210102259/http://wiki.mikrotik.com/wiki/API_PHP_class
+
+# Contributors (before moving to Git)
 * Nick Barnes
 * Ben Menking (ben [at] infotechsc [dot] com)
 * Jeremy Jefferson (http://jeremyj.com)

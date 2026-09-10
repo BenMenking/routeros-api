@@ -14,6 +14,9 @@
  * http://wiki.mikrotik.com/wiki/API_PHP_class
  *
  ******************************/
+/*
+ * SPDX-License-Identifier: MIT
+ */
 
 class RouterosAPI
 {
