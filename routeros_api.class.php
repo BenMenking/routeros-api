@@ -106,7 +106,7 @@ class RouterosAPI
             $this->debug('Connection attempt #' . $ATTEMPT . ' to ' . $PROTOCOL . $ip . ':' . $this->port . '...');
             $this->socket = @stream_socket_client($PROTOCOL . $ip.':'. $this->port, $this->error_no, $this->error_str, $this->timeout, STREAM_CLIENT_CONNECT,$context);
             if ($this->socket) {
-                socket_set_timeout($this->socket, $this->timeout);
+                stream_set_timeout($this->socket, $this->timeout);
                 $this->write('/login', false);
                 $this->write('=name=' . $login, false);
                 $this->write('=password=' . $password);
@@ -260,6 +260,8 @@ class RouterosAPI
     public function arrayChangeKeyName(&$array)
     {
         if (is_array($array)) {
+            $array_new = array();
+            
             foreach ($array as $k => $v) {
                 $tmp = str_replace("-", "_", $k);
                 $tmp = str_replace("/", "_", $tmp);
@@ -290,7 +292,12 @@ class RouterosAPI
         while (true) {
             // Read the first byte of input which gives us some or all of the length
             // of the remaining reply.
-            $BYTE   = ord(fread($this->socket, 1));
+            $BYTE   = $this->readByte();
+
+            if( $BYTE === false ) {
+                break;
+            }
+
             $LENGTH = 0;
             // If the first bit is set then we need to remove the first four bits, shift left 8
             // and then read another byte in.
@@ -427,6 +434,21 @@ class RouterosAPI
         }
 
         return $this->read();
+    }
+
+    /**
+     * Safer byte read
+     * 
+     * @return false|int 
+     */
+    private function readByte() {
+        $byte = fread($this->socket, 1);
+
+        if( $byte === false | $byte === '' ) {
+            return false;
+        }
+
+        return ord($byte);
     }
 
     /**
